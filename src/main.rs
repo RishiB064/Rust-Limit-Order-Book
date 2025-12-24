@@ -14,8 +14,7 @@ enum OrderType {
 struct Order {
     id: u64,
     order_type: OrderType,
-    // CRITICAL: We use u64 (Integers) for price.
-    // $100.00 is stored as 10000. This avoids "Ghost Money".
+   
     price: u64,
     quantity: u32,
 }
@@ -46,14 +45,14 @@ impl OrderBook {
     // --- 2. MATCHING LOGIC (The Engine) ---
 
     fn match_buy_order(&mut self, order: &mut Order) {
-        // While the buyer still wants stuff...
+      
         while order.quantity > 0 {
             // 1. PEEK: Look at the cheapest seller (First key in BTreeMap)
-            // .keys().next() is O(1) or O(log N)
+            
             let best_ask_price = if let Some(&price) = self.asks.keys().next() {
                 price
             } else {
-                break; // No sellers at all
+                break;
             };
 
             // 2. CHECK: Is the seller too expensive?
@@ -64,14 +63,14 @@ impl OrderBook {
             // 3. MATCH: Get the queue of sellers at this price
             let orders_at_level = self.asks.get_mut(&best_ask_price).unwrap();
 
-            // Eat through the queue (FIFO - Time Priority)
+            // (FIFO - Time Priority)
             while order.quantity > 0 && !orders_at_level.is_empty() {
                 let best_ask = orders_at_level.front_mut().unwrap();
 
-                // Calculate how much we can trade
+                
                 let trade_qty = std::cmp::min(order.quantity, best_ask.quantity);
 
-                // Execute Trade (Update quantities)
+                // Execute Trade 
                 order.quantity -= trade_qty;
                 best_ask.quantity -= trade_qty;
 
@@ -97,7 +96,7 @@ impl OrderBook {
     }
 
     fn match_sell_order(&mut self, order: &mut Order) {
-        // While seller has stuff to sell...
+       
         while order.quantity > 0 {
             // 1. PEEK: Look at highest bidder (Last key in BTreeMap)
             // .keys().next_back() grabs the end of the map
@@ -142,7 +141,7 @@ impl OrderBook {
     }
 }
 
-// --- 3. THE BENCHMARK (The Proof) ---
+
 
 fn main() {
     let mut book = OrderBook::new();
@@ -152,13 +151,13 @@ fn main() {
     println!(" INITIALIZING HIGH-FREQUENCY ENGINE...");
     println!("Target: Process {} Orders", total_orders);
 
-    // Start the stopwatch
+  
     let start_time = Instant::now();
 
     for i in 0..total_orders {
-        // Randomize Order: Buy/Sell, Price $90-$110, Qty 1-100
+      ]
         let is_buy = rng.gen_bool(0.5);
-        let price = rng.gen_range(9000..11000); // 9000 cents = $90.00
+        let price = rng.gen_range(9000..11000); 
         let qty = rng.gen_range(1..100);
 
         let order = Order {
@@ -177,7 +176,7 @@ fn main() {
 
     let duration = start_time.elapsed();
 
-    // --- 4. REPORTING ---
+    // --- REPORTING ---
     let seconds = duration.as_secs_f64();
     let ops = total_orders as f64 / seconds;
     let latency_ns = (seconds / total_orders as f64) * 1_000_000_000.0;
